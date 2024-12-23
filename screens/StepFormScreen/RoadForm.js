@@ -9,9 +9,9 @@ import {
   TextInput,
   Button,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import { withNavigation } from "react-navigation";
+import { useNavigation } from "@react-navigation/native"; // Updated import
 import axios from "axios";
 import { Fumi } from "react-native-textinput-effects";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
@@ -21,16 +21,10 @@ import DatePicker from "react-native-datepicker";
 import { ImagePicker, Permissions } from "expo";
 import config from "../../config";
 
-class RoadForm extends Component {
-  static navigationOptions = {
-    title: "Transport",
-    headerStyle: {
-      backgroundColor: "#37449E"
-    },
-    headerTintColor: "#fff"
-  };
+const RoadForm = () => {
+  const navigation = useNavigation(); // Using the hook for navigation
 
-  state = {
+  const [state, setState] = React.useState({
     stepId: "",
     stepDate: "",
     category: "Transport",
@@ -46,64 +40,45 @@ class RoadForm extends Component {
     tel: "",
     description:
       "Protectorum simulans communi iam subinde et cum venerit uti perniciem quaedam est adiumenta uti scribens contentum scribens Syriam et.",
-    currency: "USD"
+    currency: "USD",
+  });
+
+  const redirectToLoginPage = () => {
+    navigation.navigate("Login");
   };
 
-  redirectToLoginPage = () => {
-    this.props.navigation.navigate("Login");
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = (event) => {
     AsyncStorage.getItem("token", (err, token) => {
-      const {
-        stepId,
-        stepDate,
-        category,
-        company_name,
-        city,
-        adress,
-        start_date,
-        end_date,
-        web_site,
-        tel,
-        description,
-        price,
-        currency,
-        rating,
-        photos
-      } = this.state;
-
       if (!token) {
-        this.redirectToLoginPage();
+        redirectToLoginPage();
       } else {
         axios
           .post(
             `${config.DOMAIN}tips/publish`,
             {
-              step_id: stepId,
-              category: category,
-              company_name: this.state.company_name,
-              city: this.state.city,
-              adress: this.state.adress,
-              start_date: stepDate,
-              end_date: stepDate,
-              price: this.state.price,
-              currency: this.state.currency,
-              web_site: this.state.web_site,
-              tel: this.state.tel,
-              description: this.state.description,
-              rate: rating,
-              files: [photos]
+              step_id: state.stepId,
+              category: state.category,
+              company_name: state.company_name,
+              city: state.city,
+              adress: state.adress,
+              start_date: state.stepDate,
+              end_date: state.stepDate,
+              price: state.price,
+              currency: state.currency,
+              web_site: state.web_site,
+              tel: state.tel,
+              description: state.description,
+              rate: state.rating,
+              files: [state.photos],
             },
             {
               headers: {
-                authorization: `Bearer ${token}`
-              }
+                authorization: `Bearer ${token}`,
+              },
             }
           )
-
-          .then(response => {
-            this.props.navigation.navigate("DetailsTravel", {
+          .then((response) => {
+            navigation.navigate("DetailsTravel", {
               category: response.data.category,
               company_name: response.data.company_name,
               city: response.data.city,
@@ -115,204 +90,159 @@ class RoadForm extends Component {
               web_site: response.data.web_site,
               tel: response.data.tel,
               description: response.data.description,
-              photos: response.data.photos
+              photos: response.data.photos,
             });
           })
-          .catch(error => {
+          .catch((error) => {
             console.log("Nom de l'erreur : ", error);
           });
       }
     });
   };
-  askPermissionsAsync = async () => {
+
+  const askPermissionsAsync = async () => {
     await Permissions.askAsync(Permissions.CAMERA_ROLL);
   };
 
-  useLibraryHandler = async () => {
-    await this.askPermissionsAsync();
+  const useLibraryHandler = async () => {
+    await askPermissionsAsync();
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      base64: true
+      base64: true,
     });
-    this.setState(
-      { photos: "data:image/jpeg;base64," + result.base64 },
-      () => {}
-    );
+    setState({ ...state, photos: "data:image/jpeg;base64," + result.base64 });
   };
 
-  ratingCompleted = rating => {
-    this.setState({ rating: [Number(rating)] });
+  const ratingCompleted = (rating) => {
+    setState({ ...state, rating: [Number(rating)] });
     console.log("Rating is: " + rating);
   };
 
-  renderAddDate = () => {
-    console.log("Hey Ho");
-    <DatePicker
-      style={{
-        width: 200,
-        marginBottom: 20
-      }}
-      date={this.state.end_date}
-      showIcon={false}
-      mode="date"
-      placeholder="select date"
-      format="YYYY-MM-DD"
-      minDate="2016-05-01"
-      maxDate="2016-06-01"
-      confirmBtnText="Confirm"
-      cancelBtnText="Cancel"
-      customStyles={datePickerCustomStyle}
-      onDateChange={date => {
-        this.setState({ end_date: date });
-      }}
-    />;
-  };
+  return (
+    <ScrollView style={{ backgroundColor: "#a9ceca" }}>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={[styles.card2, { backgroundColor: "#a9ceca" }]}>
+          <Text style={styles.title}>Informations</Text>
+          <Fumi
+            style={{ borderTopRightRadius: 5, borderTopLeftRadius: 5 }}
+            label={"Type of transport :"}
+            iconClass={FontAwesomeIcon}
+            iconName={"road"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            autoCorrect={false}
+            value={state.company_name}
+            onChangeText={(text) => setState({ ...state, company_name: text })}
+          />
+          <Fumi
+            label={"From : :"}
+            iconClass={MaterialsIcon}
+            iconName={"place"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            value={state.city}
+            onChangeText={(text) => setState({ ...state, city: text })}
+          />
+          <Fumi
+            label={"To :"}
+            iconClass={MaterialsIcon}
+            iconName={"place"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            value={state.adress}
+            onChangeText={(text) => setState({ ...state, adress: text })}
+          />
+          <Fumi
+            label={"Price / person :"}
+            iconClass={FontAwesomeIcon}
+            iconName={"money"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            onChangeText={(value) => setState({ ...state, price: value })}
+            value={state.price}
+          />
 
-  render() {
-    return (
-      <ScrollView style={{ backgroundColor: "#a9ceca" }}>
-        <KeyboardAvoidingView behavior="padding">
-          <View style={[styles.card2, { backgroundColor: "#a9ceca" }]}>
-            <Text style={styles.title}>Informations</Text>
-            <Fumi
-              style={{ borderTopRightRadius: 5, borderTopLeftRadius: 5 }}
-              label={"Type of transport :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"road"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              autoCorrect={false}
-              value={this.state.company_name}
-              onChangeText={text => this.setState({ company_name: text })}
-            />
-            <Fumi
-              label={"From : :"}
-              iconClass={MaterialsIcon}
-              iconName={"place"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.city}
-              onChangeText={text => this.setState({ city: text })}
-            />
-            <Fumi
-              label={"To :"}
-              iconClass={MaterialsIcon}
-              iconName={"place"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.adress}
-              onChangeText={text => this.setState({ adress: text })}
-            />
-            <Fumi
-              label={"Price / person :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"money"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              onChangeText={value => this.setState({ price: value })}
-              value={this.state.price}
-            />
-
-            <Fumi
-              label={"Website link :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"link"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.web_site}
-              onChangeText={text => this.setState({ web_site: text })}
-            />
-            <Fumi
-              style={{
-                marginBottom: 10,
-                borderBottomRightRadius: 5,
-                borderBottomLeftRadius: 5
-              }}
-              label={"Phone Number :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"phone"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              onChangeText={value => this.setState({ tel: value })}
-              value={this.state.tel}
-            />
-            <Text style={styles.title}>Impressions</Text>
-            <View style={{ backgroundColor: "white" }}>
-              <View style={{ flexDirection: "row" }}>
-                <FormLabel>Rating :</FormLabel>
-                <Rating
-                  //   showRating
-                  startingValue={0}
-                  type="heart"
-                  onFinishRating={this.ratingCompleted}
-                  imageSize={35}
-                  style={{
-                    paddingVertical: 10,
-                    backgroundColor: "white",
-                    alignItems: "center"
-                  }}
-                />
-              </View>
-              <FormLabel>Describe your experience :</FormLabel>
-              <TextInput
-                style={styles.descriptionInput}
-                multiline={true}
-                autoCapitalize="none"
-                maxLength={500}
-                placeholder={"Tell us everything about your experience! ;)"}
-                value={this.state.description}
-                onChangeText={text => this.setState({ description: text })}
+          <Fumi
+            label={"Website link :"}
+            iconClass={FontAwesomeIcon}
+            iconName={"link"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            value={state.web_site}
+            onChangeText={(text) => setState({ ...state, web_site: text })}
+          />
+          <Fumi
+            style={{
+              marginBottom: 10,
+              borderBottomRightRadius: 5,
+              borderBottomLeftRadius: 5,
+            }}
+            label={"Phone Number :"}
+            iconClass={FontAwesomeIcon}
+            iconName={"phone"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            onChangeText={(value) => setState({ ...state, tel: value })}
+            value={state.tel}
+          />
+          <Text style={styles.title}>Impressions</Text>
+          <View style={{ backgroundColor: "white" }}>
+            <View style={{ flexDirection: "row" }}>
+              <FormLabel>Rating :</FormLabel>
+              <Rating
+                startingValue={0}
+                type="heart"
+                onFinishRating={ratingCompleted}
+                imageSize={35}
+                style={{
+                  paddingVertical: 10,
+                  backgroundColor: "white",
+                  alignItems: "center",
+                }}
               />
             </View>
-            <View style={{ marginTop: 5, alignItems: "center" }}>
-              <Button
-                title="Pick an image from camera roll"
-                onPress={this.useLibraryHandler}
-              />
-              {this.state.photos && (
-                <Image
-                  source={{ uri: this.state.photos }}
-                  style={{ width: 200, height: 200 }}
-                />
-              )}
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={this.handleSubmit}
-              >
-                <Text style={styles.buttonText}>SUBMIT</Text>
-              </TouchableOpacity>
-            </View>
+            <FormLabel>Describe your experience :</FormLabel>
+            <TextInput
+              style={styles.descriptionInput}
+              multiline={true}
+              autoCapitalize="none"
+              maxLength={500}
+              placeholder={"Tell us everything about your experience! ;)"}
+              value={state.description}
+              onChangeText={(text) => setState({ ...state, description: text })}
+            />
           </View>
-        </KeyboardAvoidingView>
-      </ScrollView>
-    );
-  }
-
-  componentDidMount() {
-    this.setState({
-      stepId: this.props.navigation.state.params.stepId,
-      stepDate: this.props.navigation.state.params.stepDate
-    });
-    console.log(
-      "stepId in Roadform : ",
-      this.props.navigation.state.params.stepId
-    );
-  }
-}
-
-export default withNavigation(RoadForm);
+          <View style={{ marginTop: 5, alignItems: "center" }}>
+            <Button
+              title="Pick an image from camera roll"
+              onPress={useLibraryHandler}
+            />
+            {state.photos && (
+              <Image
+                source={{ uri: state.photos }}
+                style={{ width: 200, height: 200 }}
+              />
+            )}
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>SUBMIT</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   input: {
-    // marginTop: 4
     height: 40,
-    alignContent: "center"
+    alignContent: "center",
   },
   card2: {
-    padding: 16
+    padding: 16,
   },
   title: {
     paddingBottom: 16,
@@ -320,21 +250,14 @@ const styles = StyleSheet.create({
     color: "#404d5b",
     fontSize: 20,
     fontWeight: "bold",
-    opacity: 0.8
+    opacity: 0.8,
   },
   descriptionInput: {
-    // height: 300,
     fontSize: 18,
     marginLeft: 12,
     marginRight: 12,
     top: 5,
-    marginBottom: 15
-    // padding: 5,
-    // color: "#37449E",
-    // borderColor: "white",
-    // borderBottomWidth: 1,
-    // alignItems: "center"
-    // backgroundColor: "white"
+    marginBottom: 15,
   },
   button: {
     marginTop: 20,
@@ -344,13 +267,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderColor: "white",
-    borderRadius: 10
+    borderRadius: 10,
   },
   buttonText: {
     color: "white",
     textAlign: "center",
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 });
 
 const datePickerCustomStyle = {
@@ -358,15 +281,17 @@ const datePickerCustomStyle = {
     position: "absolute",
     left: 0,
     top: 4,
-    marginLeft: 0
+    marginLeft: 0,
   },
   dateInput: {
-    marginLeft: 36
+    marginLeft: 36,
   },
   placeholderText: {
-    color: "grey"
+    color: "grey",
   },
   dateText: {
-    color: "black"
-  }
+    color: "#37449E",
+  },
 };
+
+export default RoadForm;

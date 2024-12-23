@@ -1,46 +1,41 @@
-import React from "react";
-import {
-  ActivityIndicator,
-  AsyncStorage,
-  StatusBar,
-  StyleSheet,
-  View
-} from "react-native";
+import React, { useEffect } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
 
-class AuthLoadingScreen extends React.Component {
-  constructor() {
-    super();
-    this.getUserToken();
-  }
+const AuthLoadingScreen = () => {
+  const navigation = useNavigation();
 
-  // Fetch the token from storage then navigate to our appropriate place
-  getUserToken() {
-    // AsyncStorage.removeItem("token");
-    AsyncStorage.getItem("token").then(userToken => {
-      // This will switch to the App screen or Auth screen and this loading
-      // screen will be unmounted and thrown away.
-      this.props.navigation.navigate(userToken ? "TravelBook" : "Auth");
-      // this.props.navigation.navigate("Auth");
-    });
-  }
+  useEffect(() => {
+    checkUserToken();
+  }, []);
 
-  // Render any loading content that you like here
-  render() {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator />
-        {/* <StatusBar barStyle="light-content" /> */}
-      </View>
-    );
-  }
-}
+  // Fetch the token from storage then navigate to appropriate screen
+  const checkUserToken = async () => {
+    try {
+      const userToken = await AsyncStorage.getItem("token");
+      // Navigate to App screen or Auth screen based on token
+      navigation.navigate(userToken ? "TravelBook" : "Auth");
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      navigation.navigate("Auth"); // Default to Auth screen on error
+    }
+  };
+
+  // Render loading content
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color="#37449E" />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 });
 
 export default AuthLoadingScreen;

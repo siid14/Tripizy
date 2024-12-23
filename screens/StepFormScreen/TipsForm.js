@@ -5,7 +5,7 @@ import {
   KeyboardAvoidingView,
   AsyncStorage,
   StyleSheet,
-  View
+  View,
 } from "react-native";
 import axios from "axios";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -16,33 +16,28 @@ export default class TipsForm extends Component {
   static navigationOptions = {
     title: "Add a cart",
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   };
 
   state = {
-    category: ""
+    category: "",
   };
 
   redirectToLoginPage = () => {
     this.props.navigation.navigate("Login");
   };
 
-  handleSubmit = text => {
-    const { category } = this.state;
-
+  handleSubmit = (text) => {
     AsyncStorage.getItem("token", (err, token) => {
-      console.log("result", token);
-
       if (!token) {
         this.redirectToLoginPage();
       } else {
         this.props.navigation.navigate("HotelForm", {
           category: this.state.category,
-          stepId: this.props.navigation.state.params.stepId
+          stepId: this.props.navigation.state.params.stepId,
         });
-        console.log(this.state.category);
       }
     });
   };
@@ -52,117 +47,110 @@ export default class TipsForm extends Component {
       <KeyboardAvoidingView style={styles.container} behavior="padding">
         <Text style={styles.hint}>Select a Category :</Text>
         <View style={styles.category}>
-          <View style={styles.iconFrame}>
-            <FontAwesomeIcon
-              name="pencil"
-              size={50}
-              color="#37449E"
-              onPress={() =>
-                this.props.navigation.navigate("FreeForm", {
-                  stepId: this.props.navigation.state.params.stepId,
-                  stepDate: this.props.navigation.state.params.stepDate
-                })
-              }
-            />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Free Text</Text>
-          </View>
-          <View style={styles.iconFrame}>
-            <FontAwesomeIcon
-              name="hotel"
-              size={50}
-              color="#37449E"
-              onPress={() =>
-                this.props.navigation.navigate("HotelForm", {
-                  stepId: this.props.navigation.state.params.stepId,
-                  stepDate: this.props.navigation.state.params.stepDate
-                })
-              }
-            />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Hotel</Text>
-          </View>
-          <View style={styles.iconFrame}>
-            <MaterialIconsIcon
-              name="restaurant"
-              size={50}
-              color="#37449E"
-              onPress={() =>
-                this.props.navigation.navigate("RestaurantForm", {
-                  stepId: this.props.navigation.state.params.stepId,
-                  stepDate: this.props.navigation.state.params.stepDate
-                })
-              }
-            />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>
-              Restaurant
-            </Text>
-          </View>
+          <TouchableOpacity
+            style={styles.iconFrame}
+            onPress={() =>
+              this.props.navigation.navigate("FreeForm", {
+                stepId: this.props.navigation.state.params.stepId,
+                stepDate: this.props.navigation.state.params.stepDate,
+              })
+            }
+          >
+            <FontAwesomeIcon name="pencil" size={50} color="#37449E" />
+            <Text style={styles.iconText}>Free Text</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.iconFrame}
+            onPress={() =>
+              this.props.navigation.navigate("HotelForm", {
+                stepId: this.props.navigation.state.params.stepId,
+                stepDate: this.props.navigation.state.params.stepDate,
+              })
+            }
+          >
+            <FontAwesomeIcon name="hotel" size={50} color="#37449E" />
+            <Text style={styles.iconText}>Hotel</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.iconFrame}
+            onPress={() =>
+              this.props.navigation.navigate("RestaurantForm", {
+                stepId: this.props.navigation.state.params.stepId,
+                stepDate: this.props.navigation.state.params.stepDate,
+              })
+            }
+          >
+            <MaterialIconsIcon name="restaurant" size={50} color="#37449E" />
+            <Text style={styles.iconText}>Restaurant</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.category}>
-          <View style={styles.iconFrame}>
-            <FontAwesomeIcon
-              name="road"
-              size={50}
-              color="#37449E"
-              onPress={() =>
-                this.props.navigation.navigate("RoadForm", {
-                  stepId: this.props.navigation.state.params.stepId,
-                  stepDate: this.props.navigation.state.params.stepDate
-                })
-              }
-            />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Road</Text>
-          </View>
-          <View style={styles.iconFrame}>
-            <MaterialIconsIcon
-              name="beach-access"
-              size={50}
-              color="#37449E"
-              onPress={() =>
-                this.props.navigation.navigate("BeachForm", {
-                  stepId: this.props.navigation.state.params.stepId,
-                  stepDate: this.props.navigation.state.params.stepDate
-                })
-              }
-            />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Beach</Text>
-          </View>
+          <TouchableOpacity
+            style={styles.iconFrame}
+            onPress={() =>
+              this.props.navigation.navigate("RoadForm", {
+                stepId: this.props.navigation.state.params.stepId,
+                stepDate: this.props.navigation.state.params.stepDate,
+              })
+            }
+          >
+            <FontAwesomeIcon name="road" size={50} color="#37449E" />
+            <Text style={styles.iconText}>Road</Text>
+          </TouchableOpacity>
 
-          <View style={styles.iconFrame}>
+          <TouchableOpacity
+            style={styles.iconFrame}
+            onPress={() =>
+              this.props.navigation.navigate("BeachForm", {
+                stepId: this.props.navigation.state.params.stepId,
+                stepDate: this.props.navigation.state.params.stepDate,
+              })
+            }
+          >
+            <MaterialIconsIcon name="beach-access" size={50} color="#37449E" />
+            <Text style={styles.iconText}>Beach</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.iconFrame}>
             <MaterialIconsIcon
               name="directions-bike"
               size={50}
               color="#37449E"
             />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Activity</Text>
-          </View>
+            <Text style={styles.iconText}>Activity</Text>
+          </TouchableOpacity>
         </View>
+
         <View style={styles.category}>
           <View style={styles.iconFrame}>
             <MaterialIconsIcon name="directions-boat" size={50} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Boat</Text>
+            <Text style={styles.iconText}>Boat</Text>
           </View>
           <View style={styles.iconFrame}>
             <EntypoIcon name="baidu" size={45} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Animals</Text>
+            <Text style={styles.iconText}>Animals</Text>
           </View>
           <View style={styles.iconFrame}>
             <FontAwesomeIcon name="fort-awesome" size={50} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Historic</Text>
+            <Text style={styles.iconText}>Historic</Text>
           </View>
         </View>
+
         <View style={styles.category}>
           <View style={styles.iconFrame}>
             <FontAwesomeIcon name="binoculars" size={50} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>See Point</Text>
+            <Text style={styles.iconText}>See Point</Text>
           </View>
           <View style={styles.iconFrame}>
             <EntypoIcon name="drink" size={45} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Bar/Club</Text>
+            <Text style={styles.iconText}>Bar/Club</Text>
           </View>
           <View style={styles.iconFrame}>
             <FontAwesomeIcon name="picture-o" size={50} color="grey" />
-            <Text style={{ fontFamily: "Arial", fontSize: 12 }}>Free Pics</Text>
+            <Text style={styles.iconText}>Free Pics</Text>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -171,57 +159,38 @@ export default class TipsForm extends Component {
 }
 
 const styles = StyleSheet.create({
-  title: {
-    textAlign: "center",
-    fontSize: 30,
-    color: "#37449E"
+  container: {
+    flex: 1,
+    backgroundColor: "#a9ceca",
+    alignItems: "center",
   },
   hint: {
     marginTop: 50,
     textAlign: "center",
     fontSize: 20,
-    color: "#37449E"
-  },
-  container: {
-    flex: 1,
-    backgroundColor: "#a9ceca",
-    alignItems: "center"
-  },
-  input: {
-    width: 250,
-    height: 60,
     color: "#37449E",
-    borderColor: "white",
-    borderBottomWidth: 1,
-    paddingLeft: 10,
-    alignItems: "center"
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#37449E",
-    height: 50,
-    width: 250,
-    justifyContent: "center",
-    borderColor: "white",
-    borderRadius: 10
-  },
-  buttonText: {
-    color: "white",
-    textAlign: "center"
   },
   category: {
     marginTop: 15,
     width: 280,
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   iconFrame: {
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "white",
     width: 70,
-    height: 70,
+    minHeight: 70,
     borderRadius: 10,
-    shadowOpacity: 15,
-    margin: 10
-  }
+    elevation: 3,
+    margin: 10,
+    padding: 5,
+  },
+  iconText: {
+    fontFamily: "Arial",
+    fontSize: 12,
+    marginTop: 5,
+    textAlign: "center",
+  },
 });

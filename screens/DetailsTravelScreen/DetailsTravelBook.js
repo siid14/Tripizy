@@ -7,7 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   AsyncStorage,
-  FlatList
+  FlatList,
 } from "react-native";
 import DatePicker from "react-native-datepicker";
 import axios from "axios";
@@ -15,15 +15,10 @@ import styles from "./styles";
 import config from "../../config";
 import MapView, { Marker } from "react-native-maps";
 import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
-
 import TipsCard from "../../components/TipsCard";
 import StepCard from "../../components/StepCard";
 
-import geolib from "geolib";
-import ActionButton from "react-native-action-button";
-
-var getDateArray = function(start, end) {
-  //Return  an array from start (date) to end (date)
+var getDateArray = function (start, end) {
   var arr = new Array();
   var dt = new Date(start);
   while (dt <= end) {
@@ -32,13 +27,14 @@ var getDateArray = function(start, end) {
   }
   return arr;
 };
+
 export default class DetailsTravelBook extends React.Component {
   static navigationOptions = ({ navigation }) => ({
     title: "Travel Books",
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   });
 
   state = {
@@ -51,7 +47,7 @@ export default class DetailsTravelBook extends React.Component {
     travelBookUserId: undefined,
     latitude: 0,
     longitude: 0,
-    markers: []
+    markers: [],
   };
 
   componentDidMount() {
@@ -64,12 +60,12 @@ export default class DetailsTravelBook extends React.Component {
       axios
         .get(`${config.DOMAIN}travelbook/${params.id}`, {
           headers: {
-            authorization: `Bearer ${token}`
-          }
+            authorization: `Bearer ${token}`,
+          },
         })
-        .then(response => {
-          var startDate = new Date(response.data.start_date); //YYYY-MM-DD
-          var endDate = new Date(response.data.end_date); //YYYY-MM-DD
+        .then((response) => {
+          var startDate = new Date(response.data.start_date);
+          var endDate = new Date(response.data.end_date);
 
           var dateArr = getDateArray(startDate, endDate);
           const markersList = [];
@@ -80,7 +76,7 @@ export default class DetailsTravelBook extends React.Component {
                 title: tip.company_name ? tip.company_name : "no name",
                 latitude: tip.loc ? tip.loc[1] : 10.494795,
                 longitude: tip.loc ? tip.loc[0] : -85.494795,
-                id: tip._id
+                id: tip._id,
               });
             }
           }
@@ -91,44 +87,42 @@ export default class DetailsTravelBook extends React.Component {
             dateArray: dateArr,
             latitude: response.data.loc ? response.data.loc[1] : 10.494795,
             longitude: response.data.loc ? response.data.loc[0] : -85.685515,
-            markers: markersList
+            markers: markersList,
           });
           axios
             .get(`${config.DOMAIN}user`, {
               headers: {
-                authorization: `Bearer ${token}`
-              }
+                authorization: `Bearer ${token}`,
+              },
             })
-            .then(response => {
-              // console.log("User => ", response.data);
+            .then((response) => {
               this.setState({
                 userId: response.data._id,
-                mounted: true
+                mounted: true,
               });
             })
-            .catch(err => {
+            .catch((err) => {
               console.log("get user id", err.message);
             });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     });
   }
 
-  renderTips = tips => {
+  renderTips = (tips) => {
     if (this.state.mounted && tips && tips.length > 0) {
-      return tips.map(tip => (
+      return tips.map((tip) => (
         <View key={tip._id}>
           <TipsCard id={tip._id} />
         </View>
       ));
     }
-    return <Text>No tips in this step</Text>;
+    return <Text style={styles.noContentText}>No tips in this step</Text>;
   };
 
-  renderSteps = item => {
-    //affiche les steps si un tips existe
+  renderSteps = (item) => {
     if (
       (this.state.mounted &&
         item["item"].tips &&
@@ -144,15 +138,16 @@ export default class DetailsTravelBook extends React.Component {
         </View>
       );
     }
-    return <Text>No tips in this travelbook</Text>;
+    return <Text style={styles.noContentText}>No tips in this travelbook</Text>;
   };
+
   displayMarkers = () => {
     if (this.state.markers.length === 0)
       return (
         <Marker
           coordinate={{
             latitude: 10.260968,
-            longitude: -85.584363
+            longitude: -85.584363,
           }}
           title="Liberia Airport"
         />
@@ -163,25 +158,20 @@ export default class DetailsTravelBook extends React.Component {
           key={i}
           coordinate={{
             latitude: marker.latitude,
-            longitude: marker.longitude
+            longitude: marker.longitude,
           }}
           title={marker.title}
         />
       ));
   };
+
   renderAddTipDate = () => {
-    // console.log(
-    //   "check button :",
-    //   this.state.mounted,
-    //   this.state.travelBookUserId,
-    //   this.state.userId
-    // );
     if (this.state.mounted && this.state.travelBookUserId === this.state.userId)
       return (
         <DatePicker
           style={{
             width: 200,
-            marginBottom: 20
+            marginBottom: 20,
           }}
           showIcon={false}
           mode="date"
@@ -192,19 +182,17 @@ export default class DetailsTravelBook extends React.Component {
           confirmBtnText="Confirm"
           cancelBtnText="Cancel"
           customStyles={datePickerCustomStyle}
-          onDateChange={date => {
+          onDateChange={(date) => {
             let idxToAdd = this.state.dateArray
               .map(Number)
               .indexOf(Number(new Date(date)));
 
             let newSteps = [...this.state.steps];
-
             newSteps[idxToAdd].show = true;
-            this.setState({ steps: newSteps }, console.log(newSteps));
-            console.log("NEWSTEPS", newSteps[idxToAdd]);
+            this.setState({ steps: newSteps });
             this.props.navigation.navigate("TipsForm", {
               stepId: newSteps[idxToAdd]._id,
-              stepDate: newSteps[idxToAdd].start_date
+              stepDate: newSteps[idxToAdd].start_date,
             });
           }}
         />
@@ -215,8 +203,7 @@ export default class DetailsTravelBook extends React.Component {
   render() {
     const { travelbook, steps, mounted } = this.state;
     const date = new Date(travelbook.start_date);
-    // console.log("POSITION GEOMETRY", this.state.latitude, this.state.longitude);
-    // console.log("Marker List ", this.state.markers);
+
     if (mounted) {
       return (
         <Fragment>
@@ -245,7 +232,7 @@ export default class DetailsTravelBook extends React.Component {
                       latitude: this.state.latitude,
                       longitude: this.state.longitude,
                       latitudeDelta: 0.515392,
-                      longitudeDelta: 0.4937
+                      longitudeDelta: 0.4937,
                     }}
                     showsUserLocation={true}
                   >
@@ -254,58 +241,60 @@ export default class DetailsTravelBook extends React.Component {
                 </View>
               </TouchableOpacity>
               <View>
-                <Text style={{ marginBottom: 10 }}>
-                  Description : {travelbook.description}
+                <Text style={styles.descriptionText}>
+                  Description: {travelbook.description}
                 </Text>
               </View>
+
+              <TouchableOpacity
+                style={styles.addTipButton}
+                onPress={this.renderAddTipDate}
+              >
+                <MaterialIconsIcon
+                  name="add-circle"
+                  size={24}
+                  color="#37449E"
+                />
+                <Text style={styles.addTipText}>Add Tip</Text>
+              </TouchableOpacity>
+
               {this.renderAddTipDate()}
 
               <FlatList
                 data={steps}
-                keyExtractor={item => item._id}
-                renderItem={item => {
+                keyExtractor={(item) => item._id}
+                renderItem={(item) => {
                   return <View>{this.renderSteps(item)}</View>;
                 }}
               />
             </View>
           </ScrollView>
-          <ActionButton buttonColor="#37449E">
-            <ActionButton.Item
-              buttonColor="#1abc9c" //vert
-              title="Add a Tip"
-              onPress={() => this.renderAddTipDate()}
-            >
-              <MaterialIconsIcon
-                name="add-circle"
-                style={styles.actionButtonIcon}
-              />
-            </ActionButton.Item>
-          </ActionButton>
         </Fragment>
       );
     } else {
       return (
-        <View>
-          <Text>Loading</Text>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading</Text>
         </View>
       );
     }
   }
 }
+
 const datePickerCustomStyle = {
   dateIcon: {
     position: "absolute",
     left: 0,
     top: 4,
-    marginLeft: 0
+    marginLeft: 0,
   },
   dateInput: {
-    marginLeft: 36
+    marginLeft: 36,
   },
   placeholderText: {
-    color: "grey"
+    color: "grey",
   },
   dateText: {
-    color: "black"
-  }
+    color: "black",
+  },
 };

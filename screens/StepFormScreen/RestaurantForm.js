@@ -9,9 +9,8 @@ import {
   TextInput,
   Button,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import { withNavigation } from "react-navigation";
 import axios from "axios";
 import { Fumi } from "react-native-textinput-effects";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
@@ -25,9 +24,9 @@ class RestaurantForm extends Component {
   static navigationOptions = {
     title: "Restaurant",
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   };
 
   state = {
@@ -46,14 +45,14 @@ class RestaurantForm extends Component {
     tel: "",
     description:
       "Protectorum simulans communi iam subinde et cum venerit uti perniciem quaedam est adiumenta uti scribens contentum scribens Syriam et.",
-    currency: "USD"
+    currency: "USD",
   };
 
   redirectToLoginPage = () => {
     this.props.navigation.navigate("Login");
   };
 
-  handleSubmit = event => {
+  handleSubmit = (event) => {
     AsyncStorage.getItem("token", (err, token) => {
       const {
         stepId,
@@ -70,7 +69,7 @@ class RestaurantForm extends Component {
         price,
         currency,
         rating,
-        photos
+        photos,
       } = this.state;
 
       if (!token) {
@@ -94,16 +93,15 @@ class RestaurantForm extends Component {
               tel: this.state.tel,
               description: this.state.description,
               rate: rating,
-              files: [photos]
+              files: [photos],
             },
             {
               headers: {
-                authorization: `Bearer ${token}`
-              }
+                authorization: `Bearer ${token}`,
+              },
             }
           )
-
-          .then(response => {
+          .then((response) => {
             this.props.navigation.navigate("DetailsTravel", {
               category: response.data.category,
               company_name: response.data.company_name,
@@ -116,15 +114,16 @@ class RestaurantForm extends Component {
               web_site: response.data.web_site,
               tel: response.data.tel,
               description: response.data.description,
-              photos: response.data.photos
+              photos: response.data.photos,
             });
           })
-          .catch(error => {
+          .catch((error) => {
             console.log("Nom de l'erreur : ", error);
           });
       }
     });
   };
+
   askPermissionsAsync = async () => {
     await Permissions.askAsync(Permissions.CAMERA_ROLL);
   };
@@ -134,7 +133,7 @@ class RestaurantForm extends Component {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      base64: true
+      base64: true,
     });
     this.setState(
       { photos: "data:image/jpeg;base64," + result.base64 },
@@ -142,32 +141,9 @@ class RestaurantForm extends Component {
     );
   };
 
-  ratingCompleted = rating => {
+  ratingCompleted = (rating) => {
     this.setState({ rating: [Number(rating)] });
     console.log("Rating is: " + rating);
-  };
-
-  renderAddDate = () => {
-    console.log("Hey Ho");
-    <DatePicker
-      style={{
-        width: 200,
-        marginBottom: 20
-      }}
-      date={this.state.end_date}
-      showIcon={false}
-      mode="date"
-      placeholder="select date"
-      format="YYYY-MM-DD"
-      minDate="2016-05-01"
-      maxDate="2016-06-01"
-      confirmBtnText="Confirm"
-      cancelBtnText="Cancel"
-      customStyles={datePickerCustomStyle}
-      onDateChange={date => {
-        this.setState({ end_date: date });
-      }}
-    />;
   };
 
   render() {
@@ -185,7 +161,7 @@ class RestaurantForm extends Component {
               iconSize={20}
               autoCorrect={false}
               value={this.state.company_name}
-              onChangeText={text => this.setState({ company_name: text })}
+              onChangeText={(text) => this.setState({ company_name: text })}
             />
             <Fumi
               label={"City :"}
@@ -194,7 +170,7 @@ class RestaurantForm extends Component {
               iconColor={"#37449E"}
               iconSize={20}
               value={this.state.city}
-              onChangeText={text => this.setState({ city: text })}
+              onChangeText={(text) => this.setState({ city: text })}
             />
             <Fumi
               label={"Adress :"}
@@ -203,35 +179,15 @@ class RestaurantForm extends Component {
               iconColor={"#37449E"}
               iconSize={20}
               value={this.state.adress}
-              onChangeText={text => this.setState({ adress: text })}
+              onChangeText={(text) => this.setState({ adress: text })}
             />
-
-            {/* <Fumi
-              label={"From :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"calendar"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.start_date}
-              onChangeText={value => this.setState({ start_date: value })}
-            /> */}
-            {/* <Fumi
-              label={"To :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"calendar"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.end_date}
-              onChangeText={value => this.setState({ end_date: value })}
-            /> */}
-
             <Fumi
               label={"Price / person :"}
               iconClass={FontAwesomeIcon}
               iconName={"money"}
               iconColor={"#37449E"}
               iconSize={20}
-              onChangeText={value => this.setState({ price: value })}
+              onChangeText={(value) => this.setState({ price: value })}
               value={this.state.price}
             />
 
@@ -242,20 +198,20 @@ class RestaurantForm extends Component {
               iconColor={"#37449E"}
               iconSize={20}
               value={this.state.web_site}
-              onChangeText={text => this.setState({ web_site: text })}
+              onChangeText={(text) => this.setState({ web_site: text })}
             />
             <Fumi
               style={{
                 marginBottom: 10,
                 borderBottomRightRadius: 5,
-                borderBottomLeftRadius: 5
+                borderBottomLeftRadius: 5,
               }}
               label={"Phone Number :"}
               iconClass={FontAwesomeIcon}
               iconName={"phone"}
               iconColor={"#37449E"}
               iconSize={20}
-              onChangeText={value => this.setState({ tel: value })}
+              onChangeText={(value) => this.setState({ tel: value })}
               value={this.state.tel}
             />
             <Text style={styles.title}>Impressions</Text>
@@ -263,7 +219,6 @@ class RestaurantForm extends Component {
               <View style={{ flexDirection: "row" }}>
                 <FormLabel>Rating :</FormLabel>
                 <Rating
-                  //   showRating
                   startingValue={0}
                   type="heart"
                   onFinishRating={this.ratingCompleted}
@@ -271,7 +226,7 @@ class RestaurantForm extends Component {
                   style={{
                     paddingVertical: 10,
                     backgroundColor: "white",
-                    alignItems: "center"
+                    alignItems: "center",
                   }}
                 />
               </View>
@@ -281,113 +236,48 @@ class RestaurantForm extends Component {
                 multiline={true}
                 autoCapitalize="none"
                 maxLength={500}
-                placeholder={"Tell us everything about your experience! ;)"}
                 value={this.state.description}
-                onChangeText={text => this.setState({ description: text })}
+                onChangeText={(text) => this.setState({ description: text })}
               />
             </View>
-            <View style={{ marginTop: 5, alignItems: "center" }}>
-              <Button
-                title="Pick an image from camera roll"
-                onPress={this.useLibraryHandler}
-              />
-              {this.state.photos && (
-                <Image
-                  source={{ uri: this.state.photos }}
-                  style={{ width: 200, height: 200 }}
-                />
-              )}
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={this.handleSubmit}
-              >
-                <Text style={styles.buttonText}>SUBMIT</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.title}>Images</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={this.useLibraryHandler}
+            >
+              <Text style={styles.buttonText}>Select Image</Text>
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </ScrollView>
     );
   }
-
-  componentDidMount() {
-    this.setState({
-      stepId: this.props.navigation.state.params.stepId,
-      stepDate: this.props.navigation.state.params.stepDate
-    });
-    console.log(
-      "stepDate in Restaurantform : ",
-      this.props.navigation.state.params.stepDate
-    );
-  }
 }
 
-export default withNavigation(RestaurantForm);
-
 const styles = StyleSheet.create({
-  input: {
-    // marginTop: 4
-    height: 40,
-    alignContent: "center"
-  },
-  card2: {
-    padding: 16
-  },
-  title: {
-    paddingBottom: 16,
-    textAlign: "center",
-    color: "#404d5b",
-    fontSize: 20,
-    fontWeight: "bold",
-    opacity: 0.8
-  },
-  descriptionInput: {
-    // height: 300,
-    fontSize: 18,
-    marginLeft: 12,
-    marginRight: 12,
-    top: 5,
-    marginBottom: 15
-    // padding: 5,
-    // color: "#37449E",
-    // borderColor: "white",
-    // borderBottomWidth: 1,
-    // alignItems: "center"
-    // backgroundColor: "white"
-  },
   button: {
-    marginTop: 20,
+    width: 200,
+    height: 40,
+    margin: 10,
     backgroundColor: "#37449E",
-    height: 50,
-    width: 250,
     alignItems: "center",
     justifyContent: "center",
-    borderColor: "white",
-    borderRadius: 10
+    borderRadius: 10,
   },
   buttonText: {
     color: "white",
-    textAlign: "center",
-    fontWeight: "bold"
-  }
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  descriptionInput: {
+    height: 150,
+    width: "100%",
+    borderColor: "#888",
+    borderWidth: 1,
+    borderRadius: 5,
+  },
 });
 
-const datePickerCustomStyle = {
-  dateIcon: {
-    position: "absolute",
-    left: 0,
-    top: 4,
-    marginLeft: 0
-  },
-  dateInput: {
-    marginLeft: 36
-  },
-  placeholderText: {
-    color: "grey"
-  },
-  dateText: {
-    color: "black"
-  }
-};
+export default RestaurantForm;

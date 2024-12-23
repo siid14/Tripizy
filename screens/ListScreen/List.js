@@ -4,55 +4,46 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
-  Text,
   FlatList,
-  AsyncStorage
 } from "react-native";
 import TravelBookCard from "../../components/TravelBookCard";
 import config from "../../config";
 import axios from "axios";
-import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
-import styles from "./styles";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { SearchBar } from "react-native-elements";
-import ActionButton from "react-native-action-button";
-import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
-const COUNTRIES = require("../SignupStepsScreen/AddressScreen/data/Countries.json");
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const COUNTRIESLABELS = COUNTRIES.map(country => country.label);
+const COUNTRIES = require("../SignupStepsScreen/AddressScreen/data/Countries.json");
+const COUNTRIESLABELS = COUNTRIES.map((country) => country.label);
 
 export default class ListScreen extends React.Component {
-  static navigationOptions = {
-    header: null
-  };
-
   state = {
     travelbooks: [],
     currentUserToken: [],
     mounted: false,
     token: undefined,
     country: "",
-    alltravelbooks: []
+    alltravelbooks: [],
   };
 
-  onChangeSearchCountry = country => {
+  handleSubmit = () => {
+    this.props.navigation.navigate("TitleAndDescription", {
+      travelbooks: this.state.travelbooks,
+    });
+  };
+
+  onChangeSearchCountry = (country) => {
     if (COUNTRIESLABELS.indexOf(country) !== -1) {
-      this.setState({ country: country });
-      // console.log(COUNTRIESLABELS.indexOf(country));
+      this.setState({ country });
       axios
         .get(`${config.DOMAIN}travelbook/`, {
-          params: {
-            country: COUNTRIESLABELS.indexOf(country)
-          },
-          headers: {
-            authorization: `Bearer ${this.state.token}`
-          }
+          params: { country: COUNTRIESLABELS.indexOf(country) },
+          headers: { authorization: `Bearer ${this.state.token}` },
         })
-        .then(response => {
-          this.setState({
-            travelbooks: response.data
-          });
+        .then((response) => {
+          this.setState({ travelbooks: response.data });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("Error", err.message);
         });
     } else {
@@ -61,29 +52,45 @@ export default class ListScreen extends React.Component {
   };
 
   componentDidMount() {
-    AsyncStorage.getItem("token", (err, token) => {
-      axios
-        .get(`${config.DOMAIN}travelbook/`, {
-          headers: {
-            authorization: `Bearer ${token}`
-          }
-        })
-        .then(response => {
-          this.setState({
-            travelbooks: response.data,
-            currentUserToken: token,
-            mounted: true,
-            token: token,
-            alltravelbooks: response.data
-          });
-        })
-        .catch(err => {
-          console.log(err);
+    AsyncStorage.getItem("token")
+      .then((token) => {
+        if (!token) throw new Error("Token not found");
+        return axios.get(`${config.DOMAIN}travelbook/`, {
+          headers: { authorization: `Bearer ${token}` },
         });
-    });
+      })
+      .then((response) => {
+        this.setState({
+          travelbooks: response.data,
+          alltravelbooks: response.data,
+          currentUserToken: token,
+          mounted: true,
+          token,
+        });
+      })
+      .catch((err) => {
+        console.error(err.message);
+      });
   }
+
+  renderItem = ({ item }) => (
+    <TouchableOpacity
+      style={localStyles.itemContainer}
+      onPress={() =>
+        this.props.navigation.navigate("DetailsTravel", { id: item._id })
+      }
+    >
+      <TravelBookCard
+        {...item}
+        navigation={this.props.navigation}
+        currentUserToken={this.state.currentUserToken}
+        userId={item.user_id._id}
+      />
+    </TouchableOpacity>
+  );
+
   render() {
-    const { currentUserToken, travelbooks } = this.state;
+    const { travelbooks } = this.state;
 
     return (
       <Fragment>
@@ -92,61 +99,64 @@ export default class ListScreen extends React.Component {
           onChangeText={this.onChangeSearchCountry}
           placeholder="Country"
           placeholderTextColor="#AAAAAA"
-          clearIcon={{ color: "#AAAAAA" }}
-          inputStyle={{ backgroundColor: "white" }}
+          inputContainerStyle={{ backgroundColor: "white" }}
+          inputStyle={{ color: "black" }}
         />
-        <ScrollView style={styles.container}>
+        <ScrollView style={localStyles.container}>
           <View>
             <FlatList
               data={travelbooks}
-              keyExtractor={item => item._id}
-              renderItem={({ item }) => {
-                return (
-                  <TouchableOpacity
-                    style={styles.itemContainer}
-                    onPress={() =>
-                      this.props.navigation.navigate("DetailsTravel", {
-                        id: item._id
-                      })
-                    }
-                  >
-                    <TravelBookCard
-                      {...item}
-                      navigation={this.props.navigation}
-                      currentUserToken={currentUserToken}
-                      userId={item.user_id._id}
-                    />
-                  </TouchableOpacity>
-                );
-              }}
+              keyExtractor={(item, index) => item?._id || index.toString()}
+              renderItem={this.renderItem}
             />
           </View>
         </ScrollView>
-
-        <ActionButton buttonColor="#37449E">
-          <ActionButton.Item
-            buttonColor="#1abc9c" //vert
-            title="Create a new Travel Book"
-            onPress={() =>
-              this.props.navigation.navigate("TitleAndDescription", {
-                travelbooks: this.state.travelbooks
-              })
-            }
-          >
-            <MaterialIconsIcon
-              name="add-circle"
-              style={styles.actionButtonIcon}
-            />
-          </ActionButton.Item>
-          <ActionButton.Item
-            buttonColor="#9b59b6" //violet
-            title="Search"
-            onPress={() => this.props.navigation.navigate("", {})}
-          >
-            <MaterialIconsIcon name="search" style={styles.actionButtonIcon} />
-          </ActionButton.Item>
-        </ActionButton>
+        <TouchableOpacity
+          style={localStyles.addButton}
+          onPress={this.handleSubmit}
+        >
+          <MaterialIcons
+            name="add-circle"
+            style={localStyles.actionButtonIcon}
+          />
+        </TouchableOpacity>
       </Fragment>
     );
   }
 }
+
+const localStyles = StyleSheet.create({
+  actionButtonIcon: {
+    fontSize: 24,
+    height: 24,
+    color: "white",
+  },
+  addButton: {
+    position: "absolute",
+    right: 30,
+    bottom: 30,
+    backgroundColor: "#37449E",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  itemContainer: {
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  container: {
+    flex: 1,
+    padding: 10,
+    backgroundColor: "#f5f5f5",
+  },
+});

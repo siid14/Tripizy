@@ -5,14 +5,13 @@ import {
   Text,
   TouchableOpacity,
   FlatList,
-  AsyncStorage
+  StyleSheet,
+  AsyncStorage,
 } from "react-native";
 import axios from "axios";
 import config from "../../config";
 import TravelBookCard from "../../components/TravelBookCard";
-import ActionButton from "react-native-action-button";
-import styles from "./styles";
-import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons"; // Fixed import
 
 const countries = require("../SignupStepsScreen/AddressScreen/data/Countries.json");
 
@@ -21,17 +20,18 @@ export default class MyTripsScreen extends Component {
     header: null,
     title: "Travel Books",
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   };
 
   state = {
     travelbooks: [],
     mounted: false,
     currentUserToken: [],
-    countries: []
+    countries: [],
   };
+
   componentDidMount() {
     console.log("didmount");
     console.log(`${config.DOMAIN}travelbook/mytrips`);
@@ -39,21 +39,21 @@ export default class MyTripsScreen extends Component {
       axios
         .get(`${config.DOMAIN}travelbook/mytrips`, {
           headers: {
-            authorization: `Bearer ${token}`
-          }
+            authorization: `Bearer ${token}`,
+          },
         })
-        .then(response => {
-          // array of travelbooks of the current user
+        .then((response) => {
           console.log("response mytrips", response.data);
           this.setState({
             travelbooks: response.data,
             currentUserToken: token,
-            mounted: true
+            mounted: true,
           });
         });
     });
     this.setState({ countries });
   }
+
   render() {
     const { mounted, travelbooks, currentUserToken } = this.state;
     if (this.state.countries.length && mounted) {
@@ -63,14 +63,14 @@ export default class MyTripsScreen extends Component {
             <View>
               <FlatList
                 data={travelbooks}
-                keyExtractor={item => item._id}
+                keyExtractor={(item) => item._id}
                 renderItem={({ item }) => {
                   return (
                     <TouchableOpacity
                       style={styles.itemContainer}
                       onPress={() =>
                         this.props.navigation.navigate("DetailsTravel", {
-                          id: item._id
+                          id: item._id,
                         })
                       }
                     >
@@ -86,23 +86,17 @@ export default class MyTripsScreen extends Component {
             </View>
           </ScrollView>
 
-          {/*  Button to create travelbook */}
-          <ActionButton buttonColor="#37449E">
-            <ActionButton.Item
-              buttonColor="#1abc9c" //vert
-              title="Create a new Travel Book"
-              onPress={() =>
-                this.props.navigation.navigate("TitleAndDescription", {
-                  travelbooks: this.state.travelbooks
-                })
-              }
-            >
-              <MaterialIconsIcon
-                name="add-circle"
-                style={styles.actionButtonIcon}
-              />
-            </ActionButton.Item>
-          </ActionButton>
+          {/* Custom Floating Action Button */}
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() =>
+              this.props.navigation.navigate("TitleAndDescription", {
+                travelbooks: this.state.travelbooks,
+              })
+            }
+          >
+            <MaterialIcons name="add-circle" style={styles.actionButtonIcon} />
+          </TouchableOpacity>
         </Fragment>
       );
     } else {
@@ -114,3 +108,46 @@ export default class MyTripsScreen extends Component {
     }
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+  },
+  itemContainer: {
+    marginBottom: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    backgroundColor: "#fff",
+  },
+  loading: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  addButton: {
+    position: "absolute",
+    right: 30,
+    bottom: 30,
+    backgroundColor: "#37449E",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  actionButtonIcon: {
+    fontSize: 24,
+    height: 24,
+    color: "white",
+  },
+});

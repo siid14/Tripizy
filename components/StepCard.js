@@ -1,72 +1,70 @@
-import React, { Component, Fragment } from "react";
-import { withNavigation } from "react-navigation";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import {
   TouchableOpacity,
   View,
   Text,
   AsyncStorage,
-  StyleSheet
+  StyleSheet,
 } from "react-native";
 import MaterialIconsIcon from "react-native-vector-icons/MaterialIcons";
+import axios from "axios";
 import config from "../config";
 import Moment from "moment";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
-class StepCard extends React.Component {
-  state = {
-    step: {},
-    tips: [],
-    mounted: false,
-    travelBookUserId: undefined,
-    userId: undefined
-  };
+const StepCard = ({ index, id }) => {
+  const [step, setStep] = useState({});
+  const [tips, setTips] = useState([]);
+  const [mounted, setMounted] = useState(false);
+  const [travelBookUserId, setTravelBookUserId] = useState(undefined);
+  const [userId, setUserId] = useState(undefined);
 
-  componentDidMount() {
+  const navigation = useNavigation(); // Use the navigation hook
+  const route = useRoute();
+
+  useEffect(() => {
     AsyncStorage.getItem("token", (err, token) => {
       axios
-        .get(`${config.DOMAIN}step/${this.props.id}`, {
+        .get(`${config.DOMAIN}step/${id}`, {
           headers: {
-            authorization: `Bearer ${token}`
-          }
+            authorization: `Bearer ${token}`,
+          },
         })
-        .then(response => {
+        .then((response) => {
           console.log("StepState => ", response.data);
-          this.setState({
-            step: response.data,
-            tips: response.data.tips,
-            travelBookUserId: response.data.travelbook_id.user_id
-          });
+          setStep(response.data);
+          setTips(response.data.tips);
+          setTravelBookUserId(response.data.travelbook_id.user_id);
+
           axios
             .get(`${config.DOMAIN}user`, {
               headers: {
-                authorization: `Bearer ${token}`
-              }
+                authorization: `Bearer ${token}`,
+              },
             })
-            .then(response => {
-              this.setState({
-                userId: response.data._id,
-                mounted: true
-              });
+            .then((response) => {
+              setUserId(response.data._id);
+              setMounted(true);
             })
-            .catch(err => {
+            .catch((err) => {
               console.log("get user id", err.message);
             });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log("get step", err.message);
         });
     });
-  }
+  }, [id]);
 
-  renderAddTipsButton = () => {
+  const renderAddTipsButton = () => {
     // hide "+ tip" button if user is not the owner of travelbook
-    if (this.state.mounted && this.state.travelBookUserId === this.state.userId)
+    if (mounted && travelBookUserId === userId)
       return (
         <TouchableOpacity
           onPress={() => {
-            this.props.navigation.navigate("TipsForm", {
-              stepId: this.state.step._id,
-              stepDate: this.state.step.start_date
+            navigation.navigate("TipsForm", {
+              stepId: step._id,
+              stepDate: step.start_date,
             });
           }}
         >
@@ -79,36 +77,30 @@ class StepCard extends React.Component {
     else return null;
   };
 
-  renderTipStartDate = () => {
+  const renderTipStartDate = () => {
     Moment.locale("en");
-    var fromDate = this.state.step.start_date;
+    var fromDate = step.start_date;
     return <Text> {Moment(fromDate).format("dddd Do MMMM YYYY")} </Text>;
   };
 
-  render() {
-    const { mounted, step } = this.state;
-    const { index } = this.props;
-    const date = new Date(step.start_date);
-
-    if (mounted) {
-      return (
-        <View style={styles.containerStep}>
-          <View style={styles.containerDay}>
-            <Text style={styles.textDay}>Day {index + 1}</Text>
-          </View>
-          <Text style={styles.textDate}>{this.renderTipStartDate()}</Text>
-          {this.renderAddTipsButton()}
+  if (mounted) {
+    return (
+      <View style={styles.containerStep}>
+        <View style={styles.containerDay}>
+          <Text style={styles.textDay}>Day {index + 1}</Text>
         </View>
-      );
-    } else {
-      return (
-        <View>
-          <Text>Loading</Text>
-        </View>
-      );
-    }
+        <Text style={styles.textDate}>{renderTipStartDate()}</Text>
+        {renderAddTipsButton()}
+      </View>
+    );
+  } else {
+    return (
+      <View>
+        <Text>Loading</Text>
+      </View>
+    );
   }
-}
+};
 
 const styles = StyleSheet.create({
   containerStep: {
@@ -119,20 +111,20 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 30,
     backgroundColor: "#D9ECF2",
-    borderRadius: 5
+    borderRadius: 5,
   },
   containerDay: {
     backgroundColor: "#37449E",
     borderBottomLeftRadius: 5,
-    borderTopLeftRadius: 5
+    borderTopLeftRadius: 5,
   },
   textDay: {
     fontWeight: "bold",
     fontSize: 17,
     color: "white",
-    padding: 3
+    padding: 3,
   },
-  textDate: { marginLeft: 5, color: "#37449E", padding: 3, fontSize: 14 }
+  textDate: { marginLeft: 5, color: "#37449E", padding: 3, fontSize: 14 },
 });
 
-export default withNavigation(StepCard);
+export default StepCard;

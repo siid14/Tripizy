@@ -1,4 +1,6 @@
-import { createAppContainer, createStackNavigator } from "react-navigation";
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import { NavigationContainer } from "@react-navigation/native";
 
 import ListStack from "./MainTabNavigator";
 import DetailsTravelScreen from "../screens/DetailsTravelScreen/DetailsTravelBook";
@@ -24,72 +26,42 @@ import NameAndBirthdayContainer from "../screens/SignupStepsScreen/NameAndBirthd
 import EmailContainer from "../screens/SignupStepsScreen/EmailScreen/Email";
 import AddressContainer from "../screens/SignupStepsScreen/AddressScreen/Address";
 
-const TravelBookNavigator = createStackNavigator({
-  ListStack,
-  DetailsTravel: {
-    screen: DetailsTravelScreen
-  },
-  TitleAndDescription: {
-    screen: TitleAndDescriptionContainer
-  },
-  Country: {
-    screen: CountryContainer
-  },
-  Dates: {
-    screen: DatesContainer
-  },
-  Photos: {
-    screen: PhotosContainer
-  },
-  Category: {
-    screen: CategoryContainer
-  },
-  StepForm: {
-    screen: StepFormScreen
-  },
-  TipsFilter: {
-    screen: TipsFilterScreen
-  },
-  TipsPage: {
-    screen: TipsPageScreen
-  },
-  CityFilter: {
-    screen: CityFilterScreen
-  },
-  DetailsMap: {
-    screen: DetailsMapScreen
-  },
-  UserProfile: {
-    screen: UserProfileScreen
-  },
-  TipsForm: {
-    screen: TipsFormScreen
-  },
-  FreeForm: {
-    screen: FreeFormScreen
-  },
-  HotelForm: {
-    screen: HotelFormScreen
-  },
-  RestaurantForm: {
-    screen: RestaurantFormScreen
-  },
-  RoadForm: {
-    screen: RoadFormScreen
-  },
-  BeachForm: {
-    screen: BeachFormScreen
-  },
-  NameAndBirthday: {
-    screen: NameAndBirthdayContainer
-  },
-  Email: {
-    screen: EmailContainer
-  },
-  Address: {
-    screen: AddressContainer
-  },
-  Main: MainTabNavigator // Laurent
-});
+const Stack = createStackNavigator();
 
-export default createAppContainer(TravelBookNavigator);
+export default function TravelBookNavigator() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="ListStack">
+        <Stack.Screen name="ListStack" component={ListStack} />
+        <Stack.Screen name="DetailsTravel" component={DetailsTravelScreen} />
+        <Stack.Screen
+          name="TitleAndDescription"
+          component={TitleAndDescriptionContainer}
+        />
+        <Stack.Screen name="Country" component={CountryContainer} />
+        <Stack.Screen name="Dates" component={DatesContainer} />
+        <Stack.Screen name="Photos" component={PhotosContainer} />
+        <Stack.Screen name="Category" component={CategoryContainer} />
+        <Stack.Screen name="StepForm" component={StepFormScreen} />
+        <Stack.Screen name="TipsFilter" component={TipsFilterScreen} />
+        <Stack.Screen name="TipsPage" component={TipsPageScreen} />
+        <Stack.Screen name="CityFilter" component={CityFilterScreen} />
+        <Stack.Screen name="DetailsMap" component={DetailsMapScreen} />
+        <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+        <Stack.Screen name="TipsForm" component={TipsFormScreen} />
+        <Stack.Screen name="FreeForm" component={FreeFormScreen} />
+        <Stack.Screen name="HotelForm" component={HotelFormScreen} />
+        <Stack.Screen name="RestaurantForm" component={RestaurantFormScreen} />
+        <Stack.Screen name="RoadForm" component={RoadFormScreen} />
+        <Stack.Screen name="BeachForm" component={BeachFormScreen} />
+        <Stack.Screen
+          name="NameAndBirthday"
+          component={NameAndBirthdayContainer}
+        />
+        <Stack.Screen name="Email" component={EmailContainer} />
+        <Stack.Screen name="Address" component={AddressContainer} />
+        <Stack.Screen name="Main" component={MainTabNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}

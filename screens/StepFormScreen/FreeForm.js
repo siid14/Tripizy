@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   KeyboardAvoidingView,
@@ -9,28 +9,22 @@ import {
   TextInput,
   Button,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
-import { withNavigation } from "react-navigation";
+import { useNavigation } from "@react-navigation/native"; // Use this hook instead of withNavigation
 import axios from "axios";
 import { Fumi } from "react-native-textinput-effects";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import MaterialsIcon from "react-native-vector-icons/MaterialIcons";
-import { FormLabel, FormInput, Rating } from "react-native-elements";
+import { FormLabel, Rating } from "react-native-elements";
 import DatePicker from "react-native-datepicker";
 import { ImagePicker, Permissions } from "expo";
 import config from "../../config";
 
-class FreeForm extends Component {
-  static navigationOptions = {
-    title: "Travel Book",
-    headerStyle: {
-      backgroundColor: "#37449E"
-    },
-    headerTintColor: "#fff"
-  };
+const FreeForm = () => {
+  const navigation = useNavigation(); // Initialize navigation hook
 
-  state = {
+  const [state, setState] = useState({
     stepId: "",
     stepDate: "",
     category: "FreeText",
@@ -46,14 +40,14 @@ class FreeForm extends Component {
     tel: "",
     description:
       "Protectorum simulans communi iam subinde et cum venerit uti perniciem quaedam est adiumenta uti scribens contentum scribens Syriam et.",
-    currency: "USD"
+    currency: "USD",
+  });
+
+  const redirectToLoginPage = () => {
+    navigation.navigate("Login");
   };
 
-  redirectToLoginPage = () => {
-    this.props.navigation.navigate("Login");
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = (event) => {
     AsyncStorage.getItem("token", (err, token) => {
       const {
         stepId,
@@ -70,11 +64,11 @@ class FreeForm extends Component {
         price,
         currency,
         rating,
-        photos
-      } = this.state;
+        photos,
+      } = state;
 
       if (!token) {
-        this.redirectToLoginPage();
+        redirectToLoginPage();
       } else {
         axios
           .post(
@@ -82,28 +76,27 @@ class FreeForm extends Component {
             {
               step_id: stepId,
               category: category,
-              company_name: this.state.company_name,
-              city: this.state.city,
-              adress: this.state.adress,
+              company_name: state.company_name,
+              city: state.city,
+              adress: state.adress,
               start_date: stepDate,
               end_date: stepDate,
-              price: this.state.price,
-              currency: this.state.currency,
-              web_site: this.state.web_site,
-              tel: this.state.tel,
-              description: this.state.description,
+              price: state.price,
+              currency: state.currency,
+              web_site: state.web_site,
+              tel: state.tel,
+              description: state.description,
               rate: rating,
-              files: [photos]
+              files: [photos],
             },
             {
               headers: {
-                authorization: `Bearer ${token}`
-              }
+                authorization: `Bearer ${token}`,
+              },
             }
           )
-
-          .then(response => {
-            this.props.navigation.navigate("DetailsTravel", {
+          .then((response) => {
+            navigation.navigate("DetailsTravel", {
               category: response.data.category,
               company_name: response.data.company_name,
               city: response.data.city,
@@ -115,149 +108,148 @@ class FreeForm extends Component {
               web_site: response.data.web_site,
               tel: response.data.tel,
               description: response.data.description,
-              photos: response.data.photos
+              photos: response.data.photos,
             });
           })
-          .catch(error => {
+          .catch((error) => {
             console.log("Nom de l'erreur : ", error);
           });
       }
     });
   };
-  askPermissionsAsync = async () => {
+
+  const askPermissionsAsync = async () => {
     await Permissions.askAsync(Permissions.CAMERA_ROLL);
   };
 
-  useLibraryHandler = async () => {
-    await this.askPermissionsAsync();
+  const useLibraryHandler = async () => {
+    await askPermissionsAsync();
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      base64: true
+      base64: true,
     });
-    this.setState(
-      { photos: "data:image/jpeg;base64," + result.base64 },
-      () => {}
-    );
+    setState((prevState) => ({
+      ...prevState,
+      photos: "data:image/jpeg;base64," + result.base64,
+    }));
   };
 
-  ratingCompleted = rating => {
-    this.setState({ rating: [Number(rating)] });
+  const ratingCompleted = (rating) => {
+    setState((prevState) => ({ ...prevState, rating: [Number(rating)] }));
     console.log("Rating is: " + rating);
   };
 
-  renderAddDate = () => {
-    console.log("Hey Ho");
-    <DatePicker
-      style={{
-        width: 200,
-        marginBottom: 20
-      }}
-      date={this.state.end_date}
-      showIcon={false}
-      mode="date"
-      placeholder="select date"
-      format="YYYY-MM-DD"
-      minDate="2016-05-01"
-      maxDate="2016-06-01"
-      confirmBtnText="Confirm"
-      cancelBtnText="Cancel"
-      customStyles={datePickerCustomStyle}
-      onDateChange={date => {
-        this.setState({ end_date: date });
-      }}
-    />;
+  useEffect(() => {
+    const { stepId, stepDate } = navigation.state.params;
+    setState((prevState) => ({
+      ...prevState,
+      stepId,
+      stepDate,
+    }));
+    console.log("stepId in Freeform : ", stepId);
+  }, [navigation.state.params]);
+
+  const renderAddDate = () => {
+    return (
+      <DatePicker
+        style={{
+          width: 200,
+          marginBottom: 20,
+        }}
+        date={state.end_date}
+        showIcon={false}
+        mode="date"
+        placeholder="select date"
+        format="YYYY-MM-DD"
+        minDate="2016-05-01"
+        maxDate="2016-06-01"
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        customStyles={datePickerCustomStyle}
+        onDateChange={(date) => {
+          setState((prevState) => ({ ...prevState, end_date: date }));
+        }}
+      />
+    );
   };
 
-  render() {
-    return (
-      <ScrollView style={{ backgroundColor: "#a9ceca" }}>
-        <KeyboardAvoidingView behavior="padding">
-          <View style={[styles.card2, { backgroundColor: "#a9ceca" }]}>
-            <Text style={styles.title}>Informations</Text>
-            <Fumi
-              style={{ borderTopRightRadius: 5, borderTopLeftRadius: 5 }}
-              label={"Title :"}
-              iconClass={FontAwesomeIcon}
-              iconName={"pencil"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              autoCorrect={false}
-              value={this.state.company_name}
-              onChangeText={text => this.setState({ company_name: text })}
-            />
-            <Fumi
-              label={"City :"}
-              iconClass={MaterialsIcon}
-              iconName={"place"}
-              iconColor={"#37449E"}
-              iconSize={20}
-              value={this.state.city}
-              onChangeText={text => this.setState({ city: text })}
-            />
+  return (
+    <ScrollView style={{ backgroundColor: "#a9ceca" }}>
+      <KeyboardAvoidingView behavior="padding">
+        <View style={[styles.card2, { backgroundColor: "#a9ceca" }]}>
+          <Text style={styles.title}>Informations</Text>
+          <Fumi
+            style={{ borderTopRightRadius: 5, borderTopLeftRadius: 5 }}
+            label={"Title :"}
+            iconClass={FontAwesomeIcon}
+            iconName={"pencil"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            autoCorrect={false}
+            value={state.company_name}
+            onChangeText={(text) =>
+              setState((prevState) => ({ ...prevState, company_name: text }))
+            }
+          />
+          <Fumi
+            label={"City :"}
+            iconClass={MaterialsIcon}
+            iconName={"place"}
+            iconColor={"#37449E"}
+            iconSize={20}
+            value={state.city}
+            onChangeText={(text) =>
+              setState((prevState) => ({ ...prevState, city: text }))
+            }
+          />
 
-            <Text style={styles.title}>Impressions</Text>
-            <View style={{ backgroundColor: "white" }}>
-              <View style={{ flexDirection: "row" }} />
-              <FormLabel>Describe your day :</FormLabel>
-              <TextInput
-                style={styles.descriptionInput}
-                multiline={true}
-                autoCapitalize="none"
-                maxLength={500}
-                placeholder={"Tell us everything about your experience! ;)"}
-                value={this.state.description}
-                onChangeText={text => this.setState({ description: text })}
-              />
-            </View>
-            <View style={{ marginTop: 5, alignItems: "center" }}>
-              <Button
-                title="Pick an image from camera roll"
-                onPress={this.useLibraryHandler}
-              />
-              {this.state.photos && (
-                <Image
-                  source={{ uri: this.state.photos }}
-                  style={{ width: 200, height: 200 }}
-                />
-              )}
-            </View>
-            <View style={{ alignItems: "center" }}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={this.handleSubmit}
-              >
-                <Text style={styles.buttonText}>SUBMIT</Text>
-              </TouchableOpacity>
-            </View>
+          <Text style={styles.title}>Impressions</Text>
+          <View style={{ backgroundColor: "white" }}>
+            <View style={{ flexDirection: "row" }} />
+            <FormLabel>Describe your day :</FormLabel>
+            <TextInput
+              style={styles.descriptionInput}
+              multiline={true}
+              autoCapitalize="none"
+              maxLength={500}
+              placeholder={"Tell us everything about your experience! ;)"}
+              value={state.description}
+              onChangeText={(text) =>
+                setState((prevState) => ({ ...prevState, description: text }))
+              }
+            />
           </View>
-        </KeyboardAvoidingView>
-      </ScrollView>
-    );
-  }
-
-  componentDidMount() {
-    this.setState({
-      stepId: this.props.navigation.state.params.stepId,
-      stepDate: this.props.navigation.state.params.stepDate
-    });
-    console.log(
-      "stepId in Freeform : ",
-      this.props.navigation.state.params.stepId
-    );
-  }
-}
-
-export default withNavigation(FreeForm);
+          <View style={{ marginTop: 5, alignItems: "center" }}>
+            <Button
+              title="Pick an image from camera roll"
+              onPress={useLibraryHandler}
+            />
+            {state.photos && (
+              <Image
+                source={{ uri: state.photos }}
+                style={{ width: 200, height: 200 }}
+              />
+            )}
+          </View>
+          <View style={{ alignItems: "center" }}>
+            <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+              <Text style={styles.buttonText}>SUBMIT</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   input: {
-    // marginTop: 4
     height: 40,
-    alignContent: "center"
+    alignContent: "center",
   },
   card2: {
-    padding: 16
+    padding: 16,
   },
   title: {
     paddingBottom: 16,
@@ -265,21 +257,14 @@ const styles = StyleSheet.create({
     color: "#404d5b",
     fontSize: 20,
     fontWeight: "bold",
-    opacity: 0.8
+    opacity: 0.8,
   },
   descriptionInput: {
-    // height: 300,
     fontSize: 18,
     marginLeft: 12,
     marginRight: 12,
     top: 5,
-    marginBottom: 15
-    // padding: 5,
-    // color: "#37449E",
-    // borderColor: "white",
-    // borderBottomWidth: 1,
-    // alignItems: "center"
-    // backgroundColor: "white"
+    marginBottom: 15,
   },
   button: {
     marginTop: 20,
@@ -289,13 +274,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderColor: "white",
-    borderRadius: 10
+    borderRadius: 10,
   },
   buttonText: {
     color: "white",
     textAlign: "center",
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 });
 
 const datePickerCustomStyle = {
@@ -303,15 +288,17 @@ const datePickerCustomStyle = {
     position: "absolute",
     left: 0,
     top: 4,
-    marginLeft: 0
+    marginLeft: 0,
   },
   dateInput: {
-    marginLeft: 36
+    marginLeft: 36,
   },
   placeholderText: {
-    color: "grey"
+    color: "grey",
   },
   dateText: {
-    color: "black"
-  }
+    color: "black",
+  },
 };
+
+export default FreeForm;

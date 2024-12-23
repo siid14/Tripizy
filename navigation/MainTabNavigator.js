@@ -1,70 +1,105 @@
 import React from "react";
 import { Platform } from "react-native";
-import {
-  createStackNavigator,
-  createBottomTabNavigator
-} from "react-navigation";
-import TabBarIcon from "../components/TabBarIcon";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
 
+import TabBarIcon from "../components/TabBarIcon";
 import ListScreen from "../screens/ListScreen/List";
 import MyTripsScreen from "../screens/MyTripsScreen/MyTrips";
 import MyProfileScreen from "../screens/UserProfileScreen/MyProfile";
 import TipsScreen from "../screens/TipsScreen/TipsList";
 
-const ListStack = createStackNavigator({
-  List: ListScreen
-});
-ListStack.navigationOptions = {
-  tabBarLabel: "Travel Books",
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-search" : "md-search"}
-    />
-  )
-};
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-const MyTripsStack = createStackNavigator({
-  MyTrips: MyTripsScreen
-});
-MyTripsStack.navigationOptions = {
-  tabBarLabel: "My Trips",
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-book" : "md-book"}
-    />
-  )
-};
+function ListStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="List" component={ListScreen} />
+    </Stack.Navigator>
+  );
+}
 
-const TipsStack = createStackNavigator({
-  Tips: TipsScreen
-});
-TipsStack.navigationOptions = {
-  tabBarLabel: "Tips",
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-star-outline" : "md-star-outline"}
-    />
-  )
-};
+function MyTripsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="MyTrips" component={MyTripsScreen} />
+    </Stack.Navigator>
+  );
+}
 
-const MyProfileStack = createStackNavigator({
-  MyProfile: MyProfileScreen
-});
-MyProfileStack.navigationOptions = {
-  tabBarLabel: "Profile",
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={Platform.OS === "ios" ? "ios-person" : "md-person"}
-    />
-  )
-};
-export default createBottomTabNavigator({
-  ListStack,
-  MyTripsStack,
-  TipsStack,
-  MyProfileStack
-});
+function TipsStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Tips" component={TipsScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function MyProfileStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="MyProfile" component={MyProfileScreen} />
+    </Stack.Navigator>
+  );
+}
+
+export default function MainTabNavigator() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator>
+        <Tab.Screen
+          name="Travel Books"
+          component={ListStack}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                name={Platform.OS === "ios" ? "ios-search" : "md-search"}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="My Trips"
+          component={MyTripsStack}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                name={Platform.OS === "ios" ? "ios-book" : "md-book"}
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Tips"
+          component={TipsStack}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                name={
+                  Platform.OS === "ios" ? "ios-star-outline" : "md-star-outline"
+                }
+              />
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Profile"
+          component={MyProfileStack}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <TabBarIcon
+                focused={focused}
+                name={Platform.OS === "ios" ? "ios-person" : "md-person"}
+              />
+            ),
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
