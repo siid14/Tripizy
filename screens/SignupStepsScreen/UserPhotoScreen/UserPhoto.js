@@ -8,7 +8,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker"; // Updated import
+import * as ImagePicker from "expo-image-picker";
 import styles from "./styles";
 
 export default class Photos extends Component {
@@ -26,10 +26,10 @@ export default class Photos extends Component {
 
   handleSubmit = () => {
     const { profile_pic } = this.state;
-    const { route } = this.props; // Get route prop
+    const { route, navigation } = this.props;
 
     try {
-      // Access params through route.params
+      // Get the params from route.params (current version)
       const {
         first_name,
         last_name,
@@ -37,10 +37,10 @@ export default class Photos extends Component {
         email,
         password,
         confirmPassword,
-      } = route.params;
+      } = route.params || {};
 
       if (profile_pic) {
-        this.props.navigation.navigate("Address", {
+        navigation.navigate("Address", {
           first_name,
           last_name,
           birthday,
@@ -83,7 +83,7 @@ export default class Photos extends Component {
 
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaType: "image", // Updated from MediaTypeOptions.Images
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,

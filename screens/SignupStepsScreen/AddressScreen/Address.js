@@ -5,30 +5,56 @@ import {
   TouchableOpacity,
   TextInput,
   KeyboardAvoidingView,
-  StyleSheet
+  StyleSheet,
 } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import axios from "axios";
 const countries = require("./data/Countries.json");
 import styles from "./styles";
 import config from "../../../config";
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 4,
+    color: "white",
+    backgroundColor: "transparent",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "white",
+    borderRadius: 8,
+    color: "white",
+    backgroundColor: "transparent",
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+});
+
 export default class Address extends Component {
   static navigationOptions = ({ navigation }) => ({
     title: "Travel Books",
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   });
 
   state = {
     address: "",
     city: "",
     countries: [],
-    nationality: 77
+    nationality: 77,
   };
 
-  handleSubmit = text => {
+  handleSubmit = (text) => {
     const { address, city, nationality } = this.state;
     const {
       first_name,
@@ -37,24 +63,24 @@ export default class Address extends Component {
       email,
       password,
       confirmPassword,
-      profile_pic
-    } = this.props.navigation.state.params;
+      profile_pic,
+    } = this.props.route.params; // Changed from navigation.state.params to route.params
 
     if (nationality) {
       axios
         .post(`${config.DOMAIN}user/sign_up`, {
-          first_name: first_name,
-          last_name: last_name,
+          first_name,
+          last_name,
           birthday: Date.parse(birthday),
-          email: email,
-          password: password,
-          confirmPassword: confirmPassword,
-          address: address,
-          city: city,
+          email,
+          password,
+          confirmPassword,
+          address,
+          city,
           files: [profile_pic],
-          nationality: nationality
+          nationality,
         })
-        .then(response => {
+        .then((response) => {
           console.log("response", response.data);
 
           this.props.navigation.navigate("List", {
@@ -69,17 +95,19 @@ export default class Address extends Component {
             address: response.data.address,
             city: response.data.city,
             profile_pic: response.data.profile_pic,
-            nationality: response.data.nationality
+            nationality: response.data.nationality,
           });
         })
-        .catch(error => {
+        .catch((error) => {
           console.log(error);
         });
     }
   };
+
   componentDidMount() {
     this.setState({ countries });
   }
+
   render() {
     if (this.state.countries.length) {
       return (
@@ -93,12 +121,12 @@ export default class Address extends Component {
             <TextInput
               style={styles.input}
               autoCapitalize="none"
-              value={this.state.adress}
+              value={this.state.address} // Fixed typo in state property name
               placeholder={"Address"}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 this.setState({
-                  address: value
+                  address: value,
                 });
               }}
             />
@@ -108,24 +136,21 @@ export default class Address extends Component {
               value={this.state.city}
               placeholder={"City"}
               placeholderTextColor="white"
-              onChangeText={value => {
+              onChangeText={(value) => {
                 this.setState({
-                  city: value
+                  city: value,
                 });
               }}
             />
             <View style={[styles.viewSelect]}>
               <RNPickerSelect
-                style={{ ...pickerSelectStyles }}
-                pickerViewStyle={[styles.pickerViewStyle]}
-                buttonsViewStyle={[styles.pickerViewStyle]}
-                buttonsTextStyle={[styles.buttonsTextStyle]}
+                style={pickerSelectStyles}
                 value={this.state.nationality}
                 items={this.state.countries}
-                onValueChange={value => {
+                onValueChange={(value) => {
                   console.log(value);
                   this.setState({
-                    nationality: value
+                    nationality: value,
                   });
                 }}
               />
@@ -144,28 +169,3 @@ export default class Address extends Component {
     );
   }
 }
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    paddingTop: 13,
-    paddingHorizontal: 10,
-    paddingBottom: 12,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 4,
-    backgroundColor: "#fff",
-    color: "#000"
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingTop: 13,
-    paddingHorizontal: 10,
-    paddingBottom: 12,
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 4,
-    backgroundColor: "white",
-    color: "black"
-  }
-});
