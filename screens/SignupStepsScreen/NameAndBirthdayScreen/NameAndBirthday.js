@@ -4,37 +4,50 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import DatePicker from "react-native-datepicker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from "./styles";
 
 export default class NamesAndBirthday extends Component {
   static navigationOptions = ({ navigation }) => ({
     headerStyle: {
-      backgroundColor: "#37449E"
+      backgroundColor: "#37449E",
     },
-    headerTintColor: "#fff"
+    headerTintColor: "#fff",
   });
 
   state = {
     first_name: "",
     last_name: "",
-    birthday: ""
+    birthday: new Date(),
+    showDatePicker: false,
   };
 
-  handleSubmit = text => {
+  handleSubmit = (text) => {
     const { first_name, last_name, birthday } = this.state;
 
     if (first_name !== "" && first_name && last_name !== "" && last_name) {
       this.props.navigation.navigate("Email", {
         first_name: first_name,
         last_name: last_name,
-        birthday: birthday
+        birthday: birthday.toISOString().split("T")[0], // Format as YYYY-MM-DD
       });
       console.log("first_name", first_name);
       console.log("last_name", last_name);
       console.log("birthday", birthday);
+    }
+  };
+
+  showDatepicker = () => {
+    this.setState({ showDatePicker: true });
+  };
+
+  onDateChange = (event, selectedDate) => {
+    this.setState({ showDatePicker: false });
+    if (selectedDate) {
+      this.setState({ birthday: selectedDate });
     }
   };
 
@@ -45,58 +58,48 @@ export default class NamesAndBirthday extends Component {
           <Text style={styles.title}>First Name</Text>
           <TextInput
             style={styles.input}
-            // autoCapitalize="none"
             value={this.state.first_name}
             placeholder={"First Name"}
             placeholderTextColor="white"
-            onChangeText={value => {
+            onChangeText={(value) => {
               this.setState({
-                first_name: value
+                first_name: value,
               });
             }}
           />
           <Text style={styles.title}>Last Name</Text>
           <TextInput
             style={styles.input}
-            // autoCapitalize="none"
             value={this.state.last_name}
             placeholder={"Last Name"}
             placeholderTextColor="white"
-            onChangeText={value => {
+            onChangeText={(value) => {
               this.setState({
-                last_name: value
+                last_name: value,
               });
             }}
           />
           <Text style={styles.title}>Birthday</Text>
-          <DatePicker
-            style={styles.datePicker}
-            date={this.state.birthday}
-            mode="date"
-            placeholder="select date"
-            format="YYYY-MM-DD"
-            minDate="1928-01-01"
-            maxDate="2018-01-01"
-            confirmBtnText="Confirm"
-            cancelBtnText="Cancel"
-            customStyles={{
-              dateIcon: {
-                position: "absolute",
-                left: 0,
-                top: 4,
-                marginLeft: 0
-              },
-              dateInput: {
-                marginLeft: 36
-              },
-              dateText: {
-                color: "white"
-              }
-            }}
-            onDateChange={date => {
-              this.setState({ birthday: date });
-            }}
-          />
+
+          <TouchableOpacity
+            style={[styles.input, { justifyContent: "center" }]}
+            onPress={this.showDatepicker}
+          >
+            <Text style={{ color: "white" }}>
+              {this.state.birthday.toISOString().split("T")[0]}
+            </Text>
+          </TouchableOpacity>
+
+          {this.state.showDatePicker && (
+            <DateTimePicker
+              value={this.state.birthday}
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              minimumDate={new Date(1928, 0, 1)}
+              maximumDate={new Date(2018, 0, 1)}
+              onChange={this.onDateChange}
+            />
+          )}
 
           <TouchableOpacity style={styles.button} onPress={this.handleSubmit}>
             <Text style={styles.buttonText}>NEXT</Text>
